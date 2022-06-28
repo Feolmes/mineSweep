@@ -16,24 +16,28 @@
         <div v-else-if="arrayToRecordOperator[index][subIndex] === STATUS.QUESTION" class="rect" >
           <img class="rect"  :src="questionImg" />
         </div>
+        <div v-else-if="arrayToRecordOperator[index][subIndex] === STATUS.ERROR_FLAG" class="rect" >
+          <img class="rect"  :src="errorFlagImg" />
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import numZeroImg from '../../src/assets/0.png';
-import numOneImg from '../../src/assets/1.png';
-import numTwoImg from '../../src/assets/2.png';
-import numThreeImg from '../../src/assets/3.png';
-import numFourImg from '../../src/assets/4.png';
-import numFiveImg from '../../src/assets/5.png';
-import numSixImg from '../../src/assets/6.png';
-import numSevenImg from '../../src/assets/7.png';
-import numEightImg from '../../src/assets/8.png';
-import numBugImg from '../../src/assets/9.png';
-import flagImg from '../../src/assets/flag.png';
-import questionImg from '../../src/assets/notSureIsMine.png';
+import numZeroImg from '@/assets/0.png';
+import numOneImg from '@/assets/1.png';
+import numTwoImg from '@/assets/2.png';
+import numThreeImg from '@/assets/3.png';
+import numFourImg from '@/assets/4.png';
+import numFiveImg from '@/assets/5.png';
+import numSixImg from '@/assets/6.png';
+import numSevenImg from '@/assets/7.png';
+import numEightImg from '@/assets/8.png';
+import numBugImg from '@/assets/9.png';
+import flagImg from '@/assets/flag.png';
+import questionImg from '@/assets/notSureIsMine.png';
+import errorFlagImg from '@/assets/error-flag.png';
 // import Vue from 'vue';
 const HIGH_LEVEL = 99;
 const HIGH_LEVEL_RECT = [16, 30];
@@ -42,7 +46,8 @@ const STATUS = {
   OPEN: 0,
   CLOSE: 1,
   FLAG: 2,
-  QUESTION: 3
+  QUESTION: 3,
+  ERROR_FLAG: 4
 };
 export default {
   name: 'HelloWorld',
@@ -54,6 +59,7 @@ export default {
       STATUS,
       flagImg,
       questionImg,
+      errorFlagImg,
       count: 0,
       isFirstRect: true,
       firstX: -1,
@@ -145,21 +151,22 @@ export default {
         setTimeout(() => {
           clearInterval(this.timer);
           localStorage.setItem('gamecnt', (Number(localStorage.getItem('gamecnt')) || 0) + 1)
-          if (this.time < localStorage.getItem('minTime')) {
+          if (!localStorage.getItem('minTime') || this.time < localStorage.getItem('minTime')) {
             localStorage.setItem('minTime', this.time)
           }
-          alert(`恭喜你赢了！时间： ${this.time}秒`, '总局数：', localStorage.getItem('gamecnt'), '记录：', localStorage.getItem('minTime'));
+          alert(`恭喜你赢了！时间： ${this.time}秒, 总局数：${localStorage.getItem('gamecnt')}, 记录：${localStorage.getItem('minTime')}`);
           this.init();
-        })
+        }, 50)
         return;
       }
       if (this.arrayToShow[index][subIndex] === MINE_NUM) {
         localStorage.setItem('gamecnt', (Number(localStorage.getItem('gamecnt') || 0)) + 1)
+        clearInterval(this.timer);
+        this.showMineDistribute();
         setTimeout(() => {
-          clearInterval(this.timer);
-          alert(`游戏失败！时间： ${this.time}秒`, '总局数：', localStorage.getItem('gamecnt'), '记录：', localStorage.getItem('minTime'));
+          alert(`游戏失败！时间： ${this.time}秒, 总局数： ${localStorage.getItem('gamecnt')}, 记录：${localStorage.getItem('minTime')}`);
           this.init();
-        })
+        }, 50)
         return;
       }
       if (this.arrayToShow[index][subIndex] === 0) {
@@ -229,6 +236,17 @@ export default {
         this.flagCnt--;
       } else if (this.arrayToRecordOperator[index][subIndex] === STATUS.QUESTION) {
         this.$set(this.arrayToRecordOperator[index], subIndex, STATUS.CLOSE)
+      }
+    },
+    showMineDistribute() {
+      for (let iterX = 0; iterX < HIGH_LEVEL_RECT[0]; iterX++) {
+        for (let iterY = 0; iterY < HIGH_LEVEL_RECT[1]; iterY++) {
+          if (this.arrayToShow[iterX][iterY] === MINE_NUM && this.arrayToRecordOperator[iterX][iterY] !== STATUS.FLAG) {
+            this.$set(this.arrayToRecordOperator[iterX], iterY, STATUS.OPEN);
+          } else if (this.arrayToShow[iterX][iterY] !== MINE_NUM && this.arrayToRecordOperator[iterX][iterY] === STATUS.FLAG) {
+            this.$set(this.arrayToRecordOperator[iterX], iterY, STATUS.ERROR_FLAG);
+          }
+        }
       }
     }
   },
