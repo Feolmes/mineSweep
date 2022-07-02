@@ -10,14 +10,17 @@
         <div v-else-if="arrayToRecordOperator[index][subIndex] === STATUS.CLOSE">
           <div style="width: 28px; height: 28px; background: #aaaaaa; border: 1px solid;"></div>
         </div>
-        <div v-else-if="arrayToRecordOperator[index][subIndex] === STATUS.FLAG" class="rect" >
+        <div v-else-if="arrayToRecordOperator[index][subIndex] === STATUS.FLAG" class="rect">
           <img class="rect"  :src="flagImg" />
         </div>
-        <div v-else-if="arrayToRecordOperator[index][subIndex] === STATUS.QUESTION" class="rect" >
+        <div v-else-if="arrayToRecordOperator[index][subIndex] === STATUS.QUESTION" class="rect">
           <img class="rect"  :src="questionImg" />
         </div>
-        <div v-else-if="arrayToRecordOperator[index][subIndex] === STATUS.ERROR_FLAG" class="rect" >
+        <div v-else-if="arrayToRecordOperator[index][subIndex] === STATUS.ERROR_FLAG" class="rect">
           <img class="rect"  :src="errorFlagImg" />
+        </div>
+        <div v-else-if="arrayToRecordOperator[index][subIndex] === STATUS.PRESS" class="rect">
+          <div style="width: 28px; height: 28px; background: #999999; border: 1px solid;"></div>
         </div>
       </div>
     </div>
@@ -47,8 +50,10 @@ const STATUS = {
   CLOSE: 1,
   FLAG: 2,
   QUESTION: 3,
-  ERROR_FLAG: 4
+  ERROR_FLAG: 4,
+  PRESS: 5
 };
+const MOUSE_LEFT = 0;
 export default {
   name: 'HelloWorld',
   data() {
@@ -67,11 +72,25 @@ export default {
       timer: null,
       time: 0,
       flagCnt: 0,
-      HIGH_LEVEL
+      HIGH_LEVEL,
+      isLeftMouseDown: false,
+      mouseLocX: -1,
+      mouseLocY: -1
     }
   },
   created() {
     this.init();
+    const that = this;
+    document.addEventListener('mousedown', function(e) {
+      if (e.button === MOUSE_LEFT) {
+        that.isLeftMouseDown = true;
+      }
+    });
+    document.addEventListener('mouseup', function(e) {
+      if (e.button === MOUSE_LEFT) {
+        that.isLeftMouseDown = false;
+      }
+    });
   },
   methods: {
     init() {
@@ -95,11 +114,11 @@ export default {
       for (var iterMine = 0; iterMine < HIGH_LEVEL; iterMine++) {
         var row = Math.floor(Math.random() * HIGH_LEVEL_RECT[0]);
         var col = Math.floor(Math.random() * HIGH_LEVEL_RECT[1]);
-        while(array[row][col] !== 0) {
+        while(array[row][col] === MINE_NUM) {
           row = Math.floor(Math.random() * HIGH_LEVEL_RECT[0]);
           col = Math.floor(Math.random() * HIGH_LEVEL_RECT[1]);
         }
-        array[row][col] = 9;
+        array[row][col] = MINE_NUM;
       }
       // 计算数字
       for (var iterRow = 0; iterRow < HIGH_LEVEL_RECT[0]; iterRow ++) {
@@ -228,16 +247,44 @@ export default {
       this.arrayToShow = array;
     },
     markAsMine(index, subIndex) {
-      if (this.arrayToRecordOperator[index][subIndex] === STATUS.CLOSE) {
-        this.$set(this.arrayToRecordOperator[index], subIndex, STATUS.FLAG)
-        this.flagCnt++;
-      } else if (this.arrayToRecordOperator[index][subIndex] === STATUS.FLAG) {
-        this.$set(this.arrayToRecordOperator[index], subIndex, STATUS.QUESTION)
-        this.flagCnt--;
-      } else if (this.arrayToRecordOperator[index][subIndex] === STATUS.QUESTION) {
-        this.$set(this.arrayToRecordOperator[index], subIndex, STATUS.CLOSE)
+      if (this.isLeftMouseDown) {
+        if (this.arrayToRecordOperator[index][subIndex] !== STATUS.OPEN) return;
+        var left = index - 1;
+        var right = index + 1;
+        var up = subIndex - 1;
+        var down = subIndex + 1;
+        var roundArray = [[left, up], [left, subIndex], [left, down], [index, up], [index, down], [right, up], [right, subIndex], [right, down]];
+        var flagCnt = 0;
+        for (var roundIterFlag = 0; roundIterFlag < roundArray.length; roundIterFlag++) {
+          var roundIterX = roundArray[roundIterFlag][0];
+          var roundIterY = roundArray[roundIterFlag][1];
+          if (roundIterX >= 0 && roundIterX < HIGH_LEVEL_RECT[0] && roundIterY >= 0 && roundIterY < HIGH_LEVEL_RECT[1]) {
+            if (this.arrayToRecordOperator[roundIterX][roundIterY] === STATUS.FLAG) {
+              flagCnt++;
+            }
+          }
+        }
+        if (flagCnt !== this.arrayToShow[index][subIndex]) return;
+        for (var roundIter = 0; roundIter < roundArray.length; roundIter++) {
+          var x = roundArray[roundIter][0];
+          var y = roundArray[roundIter][1];
+          if (x >= 0 && x < HIGH_LEVEL_RECT[0] && y >= 0 && y < HIGH_LEVEL_RECT[1]) {
+            this.openRect(x, y);
+          }
+        }
+      } else {
+        if (this.arrayToRecordOperator[index][subIndex] === STATUS.CLOSE) {
+          this.$set(this.arrayToRecordOperator[index], subIndex, STATUS.FLAG)
+          this.flagCnt++;
+        } else if (this.arrayToRecordOperator[index][subIndex] === STATUS.FLAG) {
+          this.$set(this.arrayToRecordOperator[index], subIndex, STATUS.QUESTION)
+          this.flagCnt--;
+        } else if (this.arrayToRecordOperator[index][subIndex] === STATUS.QUESTION) {
+          this.$set(this.arrayToRecordOperator[index], subIndex, STATUS.CLOSE)
+        }
       }
     },
+    // 失败后展示出所有bug
     showMineDistribute() {
       for (let iterX = 0; iterX < HIGH_LEVEL_RECT[0]; iterX++) {
         for (let iterY = 0; iterY < HIGH_LEVEL_RECT[1]; iterY++) {
