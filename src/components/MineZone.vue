@@ -19,9 +19,10 @@
         <div v-else-if="arrayToRecordOperator[index][subIndex] === STATUS.ERROR_FLAG" class="rect">
           <img class="rect"  :src="errorFlagImg" />
         </div>
-        <div v-else-if="arrayToRecordOperator[index][subIndex] === STATUS.PRESS" class="rect">
+        <!-- 把按压状态去掉先 -->
+        <!-- <div v-else-if="arrayToRecordOperator[index][subIndex] === STATUS.PRESS" class="rect">
           <div style="width: 28px; height: 28px; background: #999999; border: 1px solid;"></div>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
@@ -50,8 +51,8 @@ const STATUS = {
   CLOSE: 1,
   FLAG: 2,
   QUESTION: 3,
-  ERROR_FLAG: 4,
-  PRESS: 5
+  ERROR_FLAG: 4
+  // PRESS: 5
 };
 const MOUSE_LEFT = 0;
 export default {
@@ -94,26 +95,26 @@ export default {
   },
   methods: {
     init() {
-      var array = new Array();
-      var arrayOperator = new Array();
+      let array = new Array();
+      let arrayOperator = new Array();
       this.count = 0;
       this.firstX = -1;
       this.firstY = -1;
       this.time = 0;
       this.flagCnt = 0;
-      for (var i = 0; i < HIGH_LEVEL_RECT[0]; i++) {
+      for (let i = 0; i < HIGH_LEVEL_RECT[0]; i++) {
         array[i] = [];
         arrayOperator[i] = [];
-        for (var j = 0; j < HIGH_LEVEL_RECT[1]; j++) {
+        for (let j = 0; j < HIGH_LEVEL_RECT[1]; j++) {
           array[i].push(0);
           arrayOperator[i].push(1);
         }
       }
       this.arrayToRecordOperator = arrayOperator;
       // 布雷
-      for (var iterMine = 0; iterMine < HIGH_LEVEL; iterMine++) {
-        var row = Math.floor(Math.random() * HIGH_LEVEL_RECT[0]);
-        var col = Math.floor(Math.random() * HIGH_LEVEL_RECT[1]);
+      for (let iterMine = 0; iterMine < HIGH_LEVEL; iterMine++) {
+        let row = Math.floor(Math.random() * HIGH_LEVEL_RECT[0]);
+        let col = Math.floor(Math.random() * HIGH_LEVEL_RECT[1]);
         while(array[row][col] === MINE_NUM) {
           row = Math.floor(Math.random() * HIGH_LEVEL_RECT[0]);
           col = Math.floor(Math.random() * HIGH_LEVEL_RECT[1]);
@@ -121,18 +122,18 @@ export default {
         array[row][col] = MINE_NUM;
       }
       // 计算数字
-      for (var iterRow = 0; iterRow < HIGH_LEVEL_RECT[0]; iterRow ++) {
-        for (var iterCol= 0; iterCol < HIGH_LEVEL_RECT[1]; iterCol++) {
+      for (let iterRow = 0; iterRow < HIGH_LEVEL_RECT[0]; iterRow ++) {
+        for (let iterCol= 0; iterCol < HIGH_LEVEL_RECT[1]; iterCol++) {
           if (array[iterRow][iterCol] === MINE_NUM) continue;
-          var left = iterRow - 1;
-          var right = iterRow + 1;
-          var up = iterCol - 1;
-          var down = iterCol + 1;
-          var roundArray = [[left, up], [left, iterCol], [left, down], [iterRow, up], [iterRow, down], [right, up], [right, iterCol], [right, down]];
-          var count = 0;
-          for (var iterRound = 0; iterRound < roundArray.length; iterRound++) {
-            var iterRoundRow = roundArray[iterRound][0];
-            var iterRoundCol = roundArray[iterRound][1];
+          let left = iterRow - 1;
+          let right = iterRow + 1;
+          let up = iterCol - 1;
+          let down = iterCol + 1;
+          let roundArray = [[left, up], [left, iterCol], [left, down], [iterRow, up], [iterRow, down], [right, up], [right, iterCol], [right, down]];
+          let count = 0;
+          for (let iterRound = 0; iterRound < roundArray.length; iterRound++) {
+            let iterRoundRow = roundArray[iterRound][0];
+            let iterRoundCol = roundArray[iterRound][1];
             if (iterRoundRow >= 0 && iterRoundRow < HIGH_LEVEL_RECT[0] && iterRoundCol >= 0 && iterRoundCol < HIGH_LEVEL_RECT[1]) {
               if (array[iterRoundRow][iterRoundCol] === MINE_NUM) {
                 count++;
@@ -200,37 +201,37 @@ export default {
       }
     },
     addjustRect(index, subIndex) {
-      var array = new Array();
-      for (var iterx = 0; iterx < HIGH_LEVEL_RECT[0]; iterx++) {
+      let array = new Array();
+      for (let iterx = 0; iterx < HIGH_LEVEL_RECT[0]; iterx++) {
         array[iterx] = [];
-        for (var itery = 0; itery < HIGH_LEVEL_RECT[1]; itery++) {
+        for (let itery = 0; itery < HIGH_LEVEL_RECT[1]; itery++) {
           array[iterx].push(0);
         }
       }
-      var deltaX = this.firstX - index;
-      var deltaY = this.firstY - subIndex;
-      for (var iterx1 = 0; iterx1 < HIGH_LEVEL_RECT[0]; iterx1++) {
-        for (var itery1 = 0; itery1 < HIGH_LEVEL_RECT[1]; itery1++) {
+      let deltaX = this.firstX - index;
+      let deltaY = this.firstY - subIndex;
+      for (let iterx1 = 0; iterx1 < HIGH_LEVEL_RECT[0]; iterx1++) {
+        for (let itery1 = 0; itery1 < HIGH_LEVEL_RECT[1]; itery1++) {
           if (this.arrayToShow[iterx1][itery1] === MINE_NUM) {
-            var x = (iterx1 - deltaX + HIGH_LEVEL_RECT[0]) % HIGH_LEVEL_RECT[0];
-            var y = (itery1 - deltaY + HIGH_LEVEL_RECT[1]) % HIGH_LEVEL_RECT[1];
+            let x = (iterx1 - deltaX + HIGH_LEVEL_RECT[0]) % HIGH_LEVEL_RECT[0];
+            let y = (itery1 - deltaY + HIGH_LEVEL_RECT[1]) % HIGH_LEVEL_RECT[1];
             array[x][y] = MINE_NUM;
           }
         }
       }
        // 计算数字
-      for (var iterRow = 0; iterRow < HIGH_LEVEL_RECT[0]; iterRow ++) {
-        for (var iterCol= 0; iterCol < HIGH_LEVEL_RECT[1]; iterCol++) {
+      for (let iterRow = 0; iterRow < HIGH_LEVEL_RECT[0]; iterRow ++) {
+        for (let iterCol= 0; iterCol < HIGH_LEVEL_RECT[1]; iterCol++) {
           if (array[iterRow][iterCol] === MINE_NUM) continue;
-          var left = iterRow - 1;
-          var right = iterRow + 1;
-          var up = iterCol - 1;
-          var down = iterCol + 1;
-          var roundArray = [[left, up], [left, iterCol], [left, down], [iterRow, up], [iterRow, down], [right, up], [right, iterCol], [right, down]];
-          var count = 0;
-          for (var iterRound = 0; iterRound < roundArray.length; iterRound++) {
-            var iterRoundRow = roundArray[iterRound][0];
-            var iterRoundCol = roundArray[iterRound][1];
+          let left = iterRow - 1;
+          let right = iterRow + 1;
+          let up = iterCol - 1;
+          let down = iterCol + 1;
+          let roundArray = [[left, up], [left, iterCol], [left, down], [iterRow, up], [iterRow, down], [right, up], [right, iterCol], [right, down]];
+          let count = 0;
+          for (let iterRound = 0; iterRound < roundArray.length; iterRound++) {
+            let iterRoundRow = roundArray[iterRound][0];
+            let iterRoundCol = roundArray[iterRound][1];
             if (iterRoundRow >= 0 && iterRoundRow < HIGH_LEVEL_RECT[0] && iterRoundCol >= 0 && iterRoundCol < HIGH_LEVEL_RECT[1]) {
               if (array[iterRoundRow][iterRoundCol] === MINE_NUM) {
                 count++;
@@ -249,15 +250,15 @@ export default {
     markAsMine(index, subIndex) {
       if (this.isLeftMouseDown) {
         if (this.arrayToRecordOperator[index][subIndex] !== STATUS.OPEN) return;
-        var left = index - 1;
-        var right = index + 1;
-        var up = subIndex - 1;
-        var down = subIndex + 1;
-        var roundArray = [[left, up], [left, subIndex], [left, down], [index, up], [index, down], [right, up], [right, subIndex], [right, down]];
-        var flagCnt = 0;
-        for (var roundIterFlag = 0; roundIterFlag < roundArray.length; roundIterFlag++) {
-          var roundIterX = roundArray[roundIterFlag][0];
-          var roundIterY = roundArray[roundIterFlag][1];
+        let left = index - 1;
+        let right = index + 1;
+        let up = subIndex - 1;
+        let down = subIndex + 1;
+        let roundArray = [[left, up], [left, subIndex], [left, down], [index, up], [index, down], [right, up], [right, subIndex], [right, down]];
+        let flagCnt = 0;
+        for (let roundIterFlag = 0; roundIterFlag < roundArray.length; roundIterFlag++) {
+          let roundIterX = roundArray[roundIterFlag][0];
+          let roundIterY = roundArray[roundIterFlag][1];
           if (roundIterX >= 0 && roundIterX < HIGH_LEVEL_RECT[0] && roundIterY >= 0 && roundIterY < HIGH_LEVEL_RECT[1]) {
             if (this.arrayToRecordOperator[roundIterX][roundIterY] === STATUS.FLAG) {
               flagCnt++;
@@ -265,9 +266,9 @@ export default {
           }
         }
         if (flagCnt !== this.arrayToShow[index][subIndex]) return;
-        for (var roundIter = 0; roundIter < roundArray.length; roundIter++) {
-          var x = roundArray[roundIter][0];
-          var y = roundArray[roundIter][1];
+        for (let roundIter = 0; roundIter < roundArray.length; roundIter++) {
+          let x = roundArray[roundIter][0];
+          let y = roundArray[roundIter][1];
           if (x >= 0 && x < HIGH_LEVEL_RECT[0] && y >= 0 && y < HIGH_LEVEL_RECT[1]) {
             this.openRect(x, y);
           }
