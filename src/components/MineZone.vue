@@ -279,7 +279,7 @@ export default {
       }
     }
   },
-  
+
   destroyed() {
     document.removeEventListener('mousedown', null);
     document.removeEventListener('mouseup', null);
@@ -319,7 +319,7 @@ export default {
   width: 28px; 
   height: 28px; 
   background: #aaaaaa; 
-  border: 1px solid;
+  border: 1px solid #dddddd;
 }
 .flag-rect {
   background: #aaaaaa; 
