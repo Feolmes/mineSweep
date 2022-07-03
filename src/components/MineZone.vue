@@ -120,35 +120,7 @@ export default {
         }
         array[row][col] = MINE_NUM;
       }
-      // 计算数字
-      for (let iterRow = 0; iterRow < HIGH_LEVEL_RECT[0]; iterRow ++) {
-        for (let iterCol= 0; iterCol < HIGH_LEVEL_RECT[1]; iterCol++) {
-          if (array[iterRow][iterCol] === MINE_NUM) continue;
-          let left = iterRow - 1;
-          let right = iterRow + 1;
-          let up = iterCol - 1;
-          let down = iterCol + 1;
-          let roundArray = [[left, up], [left, iterCol], [left, down], [iterRow, up], [iterRow, down], [right, up], [right, iterCol], [right, down]];
-          let count = 0;
-          for (let iterRound = 0; iterRound < roundArray.length; iterRound++) {
-            let iterRoundRow = roundArray[iterRound][0];
-            let iterRoundCol = roundArray[iterRound][1];
-            if (iterRoundRow >= 0 && iterRoundRow < HIGH_LEVEL_RECT[0] && iterRoundCol >= 0 && iterRoundCol < HIGH_LEVEL_RECT[1]) {
-              if (array[iterRoundRow][iterRoundCol] === MINE_NUM) {
-                count++;
-              }
-            }
-          }
-          if (count === 0 && this.firstX === -1 && this.firstY === -1) {
-            if (iterRow !== 0 && iterRow !== HIGH_LEVEL_RECT[0] -1 && iterCol !== 0 && iterCol !== HIGH_LEVEL_RECT[1] - 1) {
-              this.firstX = iterRow;
-              this.firstY = iterCol;
-            }
-          }
-          array[iterRow][iterCol] = count;
-        }
-      }
-      this.arrayToShow = array;
+      this.arrayToShow = this.computeNum(array, true);
       this.isFirstRect = true;
     },
 
@@ -220,7 +192,11 @@ export default {
           }
         }
       }
-       // 计算数字
+      this.arrayToShow = this.computeNum(array, false);
+    },
+
+    computeNum(array, isInit) {
+      // 计算数字
       for (let iterRow = 0; iterRow < HIGH_LEVEL_RECT[0]; iterRow ++) {
         for (let iterCol= 0; iterCol < HIGH_LEVEL_RECT[1]; iterCol++) {
           if (array[iterRow][iterCol] === MINE_NUM) continue;
@@ -239,14 +215,16 @@ export default {
               }
             }
           }
-          if (count === 0 && this.firstX === -1 && this.firstY === -1) {
-            this.firstX = iterRow;
-            this.firstY = iterCol;
+          if (isInit && count === 0 && this.firstX === -1 && this.firstY === -1) {
+            if (iterRow !== 0 && iterRow !== HIGH_LEVEL_RECT[0] -1 && iterCol !== 0 && iterCol !== HIGH_LEVEL_RECT[1] - 1) {
+              this.firstX = iterRow;
+              this.firstY = iterCol;
+            }
           }
           array[iterRow][iterCol] = count;
         }
       }
-      this.arrayToShow = array;
+      return array;
     },
 
     markAsMine(index, subIndex) {
@@ -301,9 +279,10 @@ export default {
       }
     }
   },
+  
   destroyed() {
-    document.removeEventListener('mousedown');
-    document.removeEventListener('mouseup');
+    document.removeEventListener('mousedown', null);
+    document.removeEventListener('mouseup', null);
   }
 }
 </script>
