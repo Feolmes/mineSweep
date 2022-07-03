@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <MineZone msg="Welcome to Your Vue.js App"/>
+    <MineZone />
   </div>
 </template>
 

@@ -1,23 +1,37 @@
 <template>
-  <div class="mine-area" style="margin: 30px; display: inline-block;">
+  <div class="mine-area">
     <div class="time">⏲：{{ time }}</div>
     <div class="bug-count">bug剩余数： {{ HIGH_LEVEL - flagCnt }}</div>
     <div v-for="(item, index) in arrayToShow" :key="index" style="display: flex;">
-      <div v-for="(subItem, subIndex) in item" :key="subIndex" @click.stop.prevent="openRect(index, subIndex)" @contextmenu.stop.prevent="markAsMine(index, subIndex)">
-        <div v-if="arrayToRecordOperator[index][subIndex] === STATUS.OPEN" class="rect" >
-          <img class="rect" :src="imageArray[subItem]" />
+      <div v-for="(rectItemShowVal, subIndex) in item" :key="subIndex" @click.stop.prevent="openRect(index, subIndex)" @contextmenu.stop.prevent="markAsMine(index, subIndex)">
+        <div v-if="arrayToRecordOperator[index][subIndex] === STATUS.OPEN" class="rect open-status">
+          <div v-if="rectItemShowVal !== MINE_NUM" :style="`color: ${NUM_COLOR_ARR[rectItemShowVal]}`">
+            {{ rectItemShowVal || ' ' }}
+          </div>
+          <div v-else class="bug-rect">
+            {{ 'bug' }}
+          </div>
         </div>
         <div v-else-if="arrayToRecordOperator[index][subIndex] === STATUS.CLOSE">
-          <div style="width: 28px; height: 28px; background: #aaaaaa; border: 1px solid;"></div>
+          <div class="close-rect"></div>
         </div>
         <div v-else-if="arrayToRecordOperator[index][subIndex] === STATUS.FLAG" class="rect">
-          <img class="rect"  :src="flagImg" />
+          <div class="flag-rect">
+            {{ '🚩' }}
+          </div>
         </div>
         <div v-else-if="arrayToRecordOperator[index][subIndex] === STATUS.QUESTION" class="rect">
-          <img class="rect"  :src="questionImg" />
+          <div class="question-rect">
+            {{ '?' }}
+          </div>
         </div>
         <div v-else-if="arrayToRecordOperator[index][subIndex] === STATUS.ERROR_FLAG" class="rect">
-          <img class="rect"  :src="errorFlagImg" />
+          <div class="error-flag-x">
+            {{ '×' }}
+          </div>
+          <div class="error-flag-word">
+            {{ 'bug' }}
+          </div>
         </div>
         <!-- 把按压状态去掉先 -->
         <!-- <div v-else-if="arrayToRecordOperator[index][subIndex] === STATUS.PRESS" class="rect">
@@ -29,20 +43,6 @@
 </template>
 
 <script>
-import numZeroImg from '@/assets/0.png';
-import numOneImg from '@/assets/1.png';
-import numTwoImg from '@/assets/2.png';
-import numThreeImg from '@/assets/3.png';
-import numFourImg from '@/assets/4.png';
-import numFiveImg from '@/assets/5.png';
-import numSixImg from '@/assets/6.png';
-import numSevenImg from '@/assets/7.png';
-import numEightImg from '@/assets/8.png';
-import numBugImg from '@/assets/9.png';
-import flagImg from '@/assets/flag.png';
-import questionImg from '@/assets/notSureIsMine.png';
-import errorFlagImg from '@/assets/error-flag.png';
-// import Vue from 'vue';
 const HIGH_LEVEL = 99;
 const HIGH_LEVEL_RECT = [16, 30];
 const MINE_NUM = 9;
@@ -55,17 +55,14 @@ const STATUS = {
   // PRESS: 5
 };
 const MOUSE_LEFT = 0;
+const NUM_COLOR_ARR = ['gray', 'blue', 'forestgreen', 'crimson', 'cadetblue', 'saddlebrown', 'darkorange', 'darkgoldenrod', 'dark']
 export default {
   name: 'HelloWorld',
   data() {
     return {
       arrayToShow: [],
       arrayToRecordOperator: [],
-      imageArray: [numZeroImg, numOneImg, numTwoImg, numThreeImg, numFourImg, numFiveImg, numSixImg, numSevenImg, numEightImg, numBugImg],
       STATUS,
-      flagImg,
-      questionImg,
-      errorFlagImg,
       count: 0,
       isFirstRect: true,
       firstX: -1,
@@ -75,8 +72,10 @@ export default {
       flagCnt: 0,
       HIGH_LEVEL,
       isLeftMouseDown: false,
-      mouseLocX: -1,
-      mouseLocY: -1
+      // mouseLocX: -1,
+      // mouseLocY: -1,
+      MINE_NUM,
+      NUM_COLOR_ARR
     }
   },
   created() {
@@ -152,6 +151,7 @@ export default {
       this.arrayToShow = array;
       this.isFirstRect = true;
     },
+
     // 打开方块的逻辑，还有bug
     openRect(index, subIndex) {
       if (index < 0 || index >= HIGH_LEVEL_RECT[0] || subIndex < 0 || subIndex >= HIGH_LEVEL_RECT[1]) return;
@@ -200,6 +200,7 @@ export default {
         this.openRect(index - 1, subIndex + 1);
       }
     },
+
     addjustRect(index, subIndex) {
       let array = new Array();
       for (let iterx = 0; iterx < HIGH_LEVEL_RECT[0]; iterx++) {
@@ -247,6 +248,7 @@ export default {
       }
       this.arrayToShow = array;
     },
+
     markAsMine(index, subIndex) {
       if (this.isLeftMouseDown) {
         if (this.arrayToRecordOperator[index][subIndex] !== STATUS.OPEN) return;
@@ -285,6 +287,7 @@ export default {
         }
       }
     },
+
     // 失败后展示出所有bug
     showMineDistribute() {
       for (let iterX = 0; iterX < HIGH_LEVEL_RECT[0]; iterX++) {
@@ -298,14 +301,19 @@ export default {
       }
     }
   },
-  props: {
-    msg: String
+  destroyed() {
+    document.removeEventListener('mousedown');
+    document.removeEventListener('mouseup');
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.mine-area {
+  margin: 30px; 
+  display: inline-block;
+}
 .time {
   margin-bottom: 10px;
 }
@@ -317,5 +325,50 @@ export default {
   height: 30px;
   user-select: none;
   -webkit-user-drag: none;
+}
+.open-status {
+  font-size: 22px; 
+  background: #dddddd; 
+  line-height: 30px; 
+  font-weight: 900;
+}
+.bug-rect {
+  font-size: 15px; 
+  color: red;
+}
+.close-rect {
+  width: 28px; 
+  height: 28px; 
+  background: #aaaaaa; 
+  border: 1px solid;
+}
+.flag-rect {
+  background: #aaaaaa; 
+  line-height: 30px; 
+  font-weight: 900;
+}
+.question-rect {
+  font-size: 28px; 
+  color: black; 
+  background: #aaaaaa; 
+  line-height: 30px; 
+  font-weight: 900;
+}
+.error-flag-x {
+  position: absolute; 
+  font-size: 35px; 
+  color: red; 
+  background: transparent; 
+  width: 30px; 
+  line-height: 30px; 
+  transform: scale(2, 1);
+}
+.error-flag-word {
+   font-size: 15px; 
+   color: black; 
+   background: #dddddd; 
+   line-height: 30px; 
+   font-weight: 900;
+
 }
 </style>
