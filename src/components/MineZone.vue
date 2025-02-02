@@ -137,7 +137,7 @@ export default {
         }
         this.isFirstRect = false;
       }
-      this.$set(this.arrayToRecordOperator[index], subIndex, STATUS.OPEN)
+      this.arrayToRecordOperator[index][subIndex] = STATUS.OPEN;
       this.count++;
       if (this.count === HIGH_LEVEL_RECT[0] * HIGH_LEVEL_RECT[1] - HIGH_LEVEL) {
         setTimeout(() => {
@@ -255,13 +255,13 @@ export default {
         }
       } else {
         if (this.arrayToRecordOperator[index][subIndex] === STATUS.CLOSE) {
-          this.$set(this.arrayToRecordOperator[index], subIndex, STATUS.FLAG)
+          this.arrayToRecordOperator[index][subIndex] = STATUS.FLAG;
           this.flagCnt++;
         } else if (this.arrayToRecordOperator[index][subIndex] === STATUS.FLAG) {
-          this.$set(this.arrayToRecordOperator[index], subIndex, STATUS.QUESTION)
+          this.arrayToRecordOperator[index][subIndex] = STATUS.QUESTION;
           this.flagCnt--;
         } else if (this.arrayToRecordOperator[index][subIndex] === STATUS.QUESTION) {
-          this.$set(this.arrayToRecordOperator[index], subIndex, STATUS.CLOSE)
+          this.arrayToRecordOperator[index][subIndex] = STATUS.CLOSE
         }
       }
     },
@@ -271,9 +271,9 @@ export default {
       for (let iterX = 0; iterX < HIGH_LEVEL_RECT[0]; iterX++) {
         for (let iterY = 0; iterY < HIGH_LEVEL_RECT[1]; iterY++) {
           if (this.arrayToShow[iterX][iterY] === MINE_NUM && this.arrayToRecordOperator[iterX][iterY] !== STATUS.FLAG) {
-            this.$set(this.arrayToRecordOperator[iterX], iterY, STATUS.OPEN);
+            this.arrayToRecordOperator[iterX][iterY] = STATUS.OPEN;
           } else if (this.arrayToShow[iterX][iterY] !== MINE_NUM && this.arrayToRecordOperator[iterX][iterY] === STATUS.FLAG) {
-            this.$set(this.arrayToRecordOperator[iterX], iterY, STATUS.ERROR_FLAG);
+            this.arrayToRecordOperator[iterX][iterY] = STATUS.ERROR_FLAG;
           }
         }
       }
